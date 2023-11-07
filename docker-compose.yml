@@ -1,30 +1,27 @@
-version: '3.9'
+version: "3.9"
 
-services:
+services: 
   mysql1:
-    image: mysql:5.7
-    container_name: main-db
+    image: mysql:latest
     restart: always
+    container_name: db1
     environment:
-      - MYSQL_PASSWORD=admin
-    command: '--default-authentication-plugin=my_sql_native_password'
+      MYSQL_ROOT_PASSWORD: secret
+    command: 
+      --default-authentication-plugin=mysql_native_password
     ports:
-      -"3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-
-  react-app:
+      - "3306:3306"
+  
+  app:
     build: .
-    container_name: node-app
     environment:
-      DB_HOST: mysql1
-      DB_PORT: 3306
+      DB_HOST: mysql
+      DB_PORT: 3306x
       DB_USER: root
-      DB_PASSWORD: admin
+      DB_PASSWORD: secret
     ports:
-      - "8080:8080"
+      - "3000:3000"
     depends_on:
-      - mysql
-
-  volumes:
-    db_data:
+      - mysql1
+              
+  
