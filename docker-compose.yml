@@ -16,7 +16,7 @@ services:
     build: .
     environment:
       DB_HOST: mysql
-      DB_PORT: 3306x
+      DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: secret
     ports:

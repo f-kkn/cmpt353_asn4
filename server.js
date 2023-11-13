@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql');
+const backend = require("./backend/db");
+
+const dbName = "webdb";
+const tableName = "posts";
 
 const port = 3000;
 const host = '0.0.0.0';
@@ -9,19 +12,17 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-const connParam = {
-    host: "mysql1",
-    user: "root",
-    password: "secret"
-}
-var connection = mysql.createConnection(connParam);
-
+//var tableCreated = 0;
 app.get('/init', (req, res) => {
-    connection.connect((err) => {
-    if(err){
+    backend.initializeConnection("postDB", "posts")
+    .then((data) => {
+        console.log("COMPLETE");
+        res.send("");
+    })
+    .catch((err) => {
         console.log(err);
-    } console.log("Connection established");
     });
-})
+
+});
 
 app.listen(port, host);
