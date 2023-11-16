@@ -6,4 +6,6 @@ EXPOSE 3306
 
 WORKDIR /app
 
-CMD ["bin/bash"]
+RUN npm install -g create-react-app
+
+CMD ["/bin/bash"]

@@ -7,11 +7,12 @@ services:
   frontend:
     build: .
     ports:
-      - "80:3000"
+      - "30:3000"
     volumes:
       - ./frontend:/app
     depends_on:
       - database
+    # command: npx create-react-app
     networks:
       - routings
     stdin_open: true
@@ -20,7 +21,7 @@ services:
   backend:
     build: .
     ports:
-      - "81:8080"
+      - "80:8080"
     volumes:
       - ./backend:/app
     depends_on:
@@ -33,7 +34,7 @@ services:
   database:
     image: mysql:latest
     environment:
-      - MYSQL_ROOT_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: admin
     ports:
       - "3306:3306"
     networks:

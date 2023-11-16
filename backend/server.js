@@ -1,75 +1,85 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const backend = require("db");
-const mysql = require('mysql');
+const mysql = require('mysql2');
+const path = require('path');
 
 //connections for express
-const port = 3000;
+const port = 8080;
 const host = '0.0.0.0';
 const app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.use('/', express.static(path.join(__dirname, 'public')));
 
 
 //Connection for mysql
 var dbName = "webdb";
 var tableName = "posts";
-var isConnected = false;
+
 const connection = mysql.createConnection({
-    host: "mysql1",
+    host: "database",
     user: "root",
-    password: "secret"
-})
+    password: "admin",
+    port: 3306
+});
 
+connection.connect((err) => {
+    if (err) throw err;
+    console.log("MySQL Connected");
+});
 
-app.get('/init', (request, response) => {
-    if(isConnected){
-        console.log(`[SERVER] : Already established a connection to mysql.`);
-        return;
-    }
-
-    connection.connect((err) => {
-        if(err){throw err;}
-        console.log(`[SERVER] : Initialize connection to mysql.`)
-        isConnected = true;
-    })
-
+app.get('/init', (req, res) => {
     var queryCreateDatabase = `CREATE DATABASE IF NOT EXISTS ${dbName}`;
     connection.query(queryCreateDatabase, (err) => {
-        if(err){throw err;}
+        if(err) res.status(400).send("Server cannot create a database.");
         console.log(`[SERVER] : database \'${dbName}\' created.`);
     });
 
-    var getDatabase = `USE ${dbName}`;
-    var checkTable = `DROP TABLE IF EXISTS ${tableName}`;
-    var addTable = `CREATE TABLE IF NOT EXISTS ${tableName} (
+    let getDatabase = `USE ${dbName}`;
+    let checkTable = `DROP TABLE IF EXISTS ${tableName}`;
+    let addTable = `CREATE TABLE IF NOT EXISTS ${tableName} (
         id          int unsigned NOT NULL auto_increment,
         topic       varchar(100) NOT NULL,
         data        varchar(100) NOT NULL,
         PRIMARY KEY (id))`;
-
-    connection.query(getDatabase, (err) => {
-        if(err){throw err;}
+    connection.query(getDatabase, (err) => { //select the database first
+        if(err) res.status(400).send("Server cannot get the database.");
         console.log(`[SERVER] : Working with ${dbName} database.`);
-        connection.query(checkTable, (err) => {
+        connection.query(checkTable, (err) => { //then, check if the table exists. Delete if it does.
             if(err){throw err;}
             console.log(`[SERVER] : Deleting contents of ${tableName}.`);
         });
         connection.query(addTable, (err) => { //Create the table
-            if(err){throw err;}
+            if(err) res.status(400).send("Server cannot add the table to database.");
             console.log(`[SERVER] : Creating table ${tableName}.`);
         });
-    }); 
+    });
+    res.send("Initialization complete"); 
 });
 
-app.get('/get', (req, res) => {
-    var getTable = `SELECT * FROM ${tableName}`;
-    connection.query(getTable, (err, result) => {
-        if(err){throw err;}
-        if(result.length == 0){console.log("Empty Table")};
-        res.send(result);
+app.post('/sendToDB', (req, res) => {
+    let insertPostQuery = `INSERT INTO ${tableName}(topic,data) VALUES('${req.body.postTopic}','${req.body.postMsg}')`;
+    connection.query(insertPostQuery, (err) => {
+        if(err) res.status(400).send('Failed to insert post');
+        else{
+            res.send("Post Added Successfully.");
+            console.log("[SERVER] : Post successfully saved to database.");
+        }
     });
 });
 
+app.get('/sendToClient', (req, res) => {
+    let useTable = `SELECT * FROM posts`;
+    connection.query(useTable, (err, rows) => {
+        if(err) res.status(400).send('Failed to send posts to client');
+        else{
+            console.log(`Sending ${rows}`);
+            res.send(rows);
+            console.log("[SERVER] : All posts sent to client.");
+        }
+    })
+});
+
 app.listen(port, host);
+console.log(`HOST ${host} listening on PORT ${port}`);
