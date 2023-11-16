@@ -1,27 +1,55 @@
 version: "3.9"
 
+networks:
+  routings:
+
 services: 
-  mysql1:
+  frontend:
+    build: .
+    ports:
+      - "80:3000"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - database
+    networks:
+      - routings
+    stdin_open: true
+    tty: true
+
+  backend:
+    build: .
+    ports:
+      - "81:8080"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - database
+    networks:
+      - routings
+    stdin_open: true
+    tty: true
+
+  database:
     image: mysql:latest
-    restart: always
-    container_name: db1
     environment:
-      MYSQL_ROOT_PASSWORD: secret
-    command: 
-      --default-authentication-plugin=mysql_native_password
+      - MYSQL_ROOT_PASSWORD: admin
     ports:
       - "3306:3306"
+    networks:
+      - routings
+    stdin_open: true
+    tty: true
+
   
-  app:
-    build: .
-    environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: secret
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mysql1
+
+    
+
+
+
+
+
+
+
               
   

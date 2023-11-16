@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const backend = require("./backend/db");
+const backend = require("db");
 const mysql = require('mysql');
 
 //connections for express
