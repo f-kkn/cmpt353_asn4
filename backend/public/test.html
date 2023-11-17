@@ -43,7 +43,7 @@
                 data: "postTopic=" + document.getElementById("sendTopic").value + "&postMsg=" + document.getElementById("sendMessage").value,
                 contentType: 'application/x-www-form-urlencoded',
                 success: function(data){
-                    $('#server-message').val($('#server-message').val() + "\n" + data);
+                    $('#server-message').val($('#server-message').val() + "\n" + data.resp);
                 },
                 error: function(){
                     $('#server-message').val($('#server-message').val() + "\n" + "Message wasnt posted. Try again.");
@@ -63,7 +63,7 @@
                 type: "GET",
                 url: url,
                 success: function(data){
-                    $('#server-message').val($('#server-message').val() + "\n" + data);
+                    $('#server-message').val($('#server-message').val() + "\n" + data.resp);
                     document.getElementById("other-posts").value = "";
                     document.getElementById("sendTopic").value = "";
                     document.getElementById("sendMessage").value = "";
